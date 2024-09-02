@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: whoami-auth
+  labels:
+#    app: whoami-auth
+    traefik.http.routers.whoami-auth.rule: Host(`whoami-auth.localhost`)
+    traefik.http.services.whoami-auth.loadbalancer.server.port: 3000
+    traefik.http.routers.whoami-auth.middlewares: whoami-auth
+    traefik.http.middlewares.whoami-auth.basicauth.users: whoami:$2y$05$Hm7fdoZE27SunhBz3GxeXOv5.mr2D14Rgxc2GFvoXaVEHP2d2IMye
+spec:
+  containers:
+  - name: whoami-auth
+    image: docker.io/traefik/whoami:latest
+#    ports:
+#    - containerPort: 3000
+#      hostPort: 3001
+#      protocol: TCP
+    env:
+    - name: WHOAMI_PORT_NUMBER
+      value: 3000
+  restartPolicy: Never
+  dnsPolicy: Default

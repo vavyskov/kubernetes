@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: traefik
+  labels:
+#    app: traefik
+    traefik.http.routers.traefik.rule: Host(`traefik.localhost`)
+    traefik.http.services.traefik.loadbalancer.server.port: 8080
+    traefik.http.routers.traefik.middlewares: traefik
+    traefik.http.middlewares.traefik.basicauth.users: traefik:$2y$05$453P5LUuGavG1RFtL1fZ9.JPotyDotTJaOeTpwQtUxNXuFhniLjc6
+spec:
+  containers:
+  - name: traefik
+    image: docker.io/library/traefik:v3.0
+    args:
+    - '--accesslog=true'
+    - '--api.dashboard=true'
+    - '--api.insecure=true'
+    - '--entrypoints.http.address=:8000'
+    - '--log.level=info'
+    - '--providers.docker=true'
+    volumeMounts:
+    - mountPath: /var/run/docker.sock:z
+      name: docker_sock
+    ports:
+    - containerPort: 8000
+      hostPort: 8000
+      protocol: TCP
+#    - containerPort: 8080
+#      hostPort: 8001
+#      protocol: TCP
+  restartPolicy: Never
+  dnsPolicy: Default
+  volumes:
+  - name: docker_sock
+    hostPath:
+      path: "/run/user/1000/podman/podman.sock"
+      type: File
